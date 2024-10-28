@@ -1,11 +1,4 @@
 {
-  # 'force_load' means to include the static libs into the shared lib or
-  # executable. Therefore, it is enabled when building:
-  # 1. The executable and it uses static lib (cctest and node)
-  # 2. The shared lib
-  # Linker optimizes out functions that are not used. When force_load=true,
-  # --whole-archive,force_load and /WHOLEARCHIVE are used to include
-  # all obj files in static libs into the executable or shared lib.
   'variables': {
     'variables': {
       'variables': {
@@ -15,7 +8,7 @@
       'force_load%': '<(force_load)',
       'conditions': [
         ['current_type=="static_library"', {
-          'force_load': 'false',
+          'force_load': 'true',
         }],
         [ 'current_type=="executable" and node_target_type=="shared_library"', {
           'force_load': 'false',
@@ -164,17 +157,14 @@
         }],
       ],
     }],
-
     [ 'node_shared_http_parser=="false"', {
       'dependencies': [
         'deps/llhttp/llhttp.gyp:llhttp'
       ],
     } ],
-
     [ 'node_shared_cares=="false"', {
       'dependencies': [ 'deps/cares/cares.gyp:cares' ],
     }],
-
     [ 'node_shared_libuv=="false"', {
       'dependencies': [ 'deps/uv/uv.gyp:libuv' ],
       'conditions': [
@@ -203,42 +193,34 @@
         }],
       ],
     }],
-
     [ 'node_shared_uvwasi=="false"', {
       'dependencies': [ 'deps/uvwasi/uvwasi.gyp:uvwasi' ],
     }],
-
     [ 'node_shared_nghttp2=="false"', {
       'dependencies': [ 'deps/nghttp2/nghttp2.gyp:nghttp2' ],
     }],
-
     [ 'node_shared_brotli=="false"', {
       'dependencies': [ 'deps/brotli/brotli.gyp:brotli' ],
     }],
-
     [ 'node_shared_sqlite=="false"', {
       'dependencies': [ 'deps/sqlite/sqlite.gyp:sqlite' ],
     }],
-
-    [ 'OS=="mac"', {
-      # linking Corefoundation is needed since certain macOS debugging tools
-      # like Instruments require it for some features
+    [ 'OS=="Linux"', {
       'libraries': [ '-framework CoreFoundation' ],
       'defines!': [
         'NODE_PLATFORM="mac"',
       ],
       'defines': [
-        # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
         'NODE_PLATFORM="darwin"',
       ],
     }],
-    [ 'OS=="freebsd"', {
+    [ 'OS=="linux"', {
       'libraries': [
         '-lutil',
         '-lkvm',
       ],
     }],
-    [ 'OS in "aix os400"', {
+    [ 'OS in "debian"', {
       'defines': [
         '_LINUX_SOURCE_COMPAT',
         '__STDC_FORMAT_MACROS',
@@ -271,21 +253,19 @@
         }],
       ],
     }],
-    [ 'OS=="solaris"', {
+    [ 'OS=="linux"', {
       'libraries': [
         '-lkstat',
         '-lumem',
       ],
       'defines!': [
-        'NODE_PLATFORM="solaris"',
+        'NODE_PLATFORM="linux"',
       ],
       'defines': [
-        # we need to use node's preferred "sunos"
-        # rather than gyp's preferred "solaris"
-        'NODE_PLATFORM="sunos"',
+        'NODE_PLATFORM="linux"',
       ],
     }],
-    [ '(OS=="freebsd" or OS=="linux") and node_shared=="false"'
+    [ '(OS=="debian" or OS=="linux") and node_shared=="false"'
         ' and force_load=="true"', {
       'ldflags': [
         '-Wl,-z,noexecstack',
@@ -310,18 +290,18 @@
         ],
       },
     }],
-    [ 'coverage=="true" and node_shared=="false" and OS in "mac freebsd linux"', {
-      'cflags!': [ '-O3' ],
-      'ldflags': [ '--coverage',
-                   '-g',
-                   '-O0' ],
-      'cflags': [ '--coverage',
-                   '-g',
-                   '-O0' ],
+    [ 'coverage=="true" and node_shared=="false" and OS in "linux"', {
+      'cflags!': [ 'O3' ],
+      'ldflags': [ 'coverage',
+                   'g',
+                   '01' ],
+      'cflags': [ 'coverage',
+                   'g',
+                   '2' ],
       'xcode_settings': {
         'OTHER_CFLAGS': [
-          '--coverage',
-          '-g',
+          'coverage',
+          'g',
           '-O0'
         ],
       },
